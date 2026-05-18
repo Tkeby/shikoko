@@ -1,0 +1,34 @@
+name: pysquirrel-demo
+
+services:
+  db:
+    build: ../docker/postgres
+    container_name: pysquirrel-demo-db
+    environment:
+      POSTGRES_USER: squirrel
+      POSTGRES_PASSWORD: squirrel
+      POSTGRES_DB: squirrel
+    ports:
+      - "54324:5432"
+    volumes:
+      - pysquirrel-demo-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U squirrel -d squirrel"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+
+  app:
+    build:
+      context: ./app
+    container_name: pysquirrel-demo-app
+    environment:
+      DATABASE_URL: postgresql://squirrel:squirrel@db:5432/squirrel
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pysquirrel-demo-db-data:

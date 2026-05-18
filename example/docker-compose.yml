@@ -1,0 +1,23 @@
+name: squirrel-test
+
+# Dedicated Postgres for the pytest suite and demo app:
+services:
+  db:
+    build: ./docker/postgres
+    container_name: squirrel-test-db
+    environment:
+      POSTGRES_USER: squirrel
+      POSTGRES_PASSWORD: squirrel
+      POSTGRES_DB: squirrel
+    ports:
+      - "54323:5432"
+    volumes:
+      - squirrel-test-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U squirrel -d squirrel"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  squirrel-test-db-data:
