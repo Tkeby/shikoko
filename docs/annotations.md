@@ -1,13 +1,13 @@
 # Annotations
 
-pysquirrel supports a small set of annotations in SQL files that control
+shikoko supports a small set of annotations in SQL files that control
 how the generated Python code behaves.
 
 See also: [Type mapping](type-mapping.md) | [Usage guide](usage.md) | [Troubleshooting](troubleshooting.md)
 
 ## Nullability overrides (`!` and `?`)
 
-By default, pysquirrel infers nullability from three sources in priority
+By default, shikoko infers nullability from three sources in priority
 order: (1) explicit overrides via column aliases, (2) the Postgres
 `EXPLAIN` plan for outer-join nullability, and (3) the
 `pg_attribute.attnotnull` catalog. When you need to override the
@@ -16,7 +16,7 @@ list.
 
 ### `!` — force non-null
 
-Appending `!` to a column alias tells pysquirrel to emit it as a
+Appending `!` to a column alias tells shikoko to emit it as a
 non-nullable Python field, regardless of what the plan or catalog says.
 This is useful when you know a left-join column is always populated
 (e.g. a foreign key that is guaranteed to be satisfied in your domain).

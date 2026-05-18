@@ -1,4 +1,4 @@
-"""Demo FastAPI app using pysquirrel-generated query functions."""
+"""Demo FastAPI app using shikoko-generated query functions."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, status
 
 # Import the generated query functions.
-# Run `pysquirrel generate` to create this module first.
+# Run `shikoko generate` to create this module first.
 from sql_generated import (
     CreateUserRow,
     FindUserByEmailRow,
@@ -22,11 +22,11 @@ from sql_generated import (
     list_users,
 )
 
-app = FastAPI(title="pysquirrel Demo", version="0.1.0")
+app = FastAPI(title="shikoko Demo", version="0.1.0")
 
 DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql://squirrel:squirrel@localhost:54323/squirrel",
+    "postgresql://shikoko:shikoko@localhost:54323/shikoko",
 )
 
 _pool: asyncpg.Pool | None = None

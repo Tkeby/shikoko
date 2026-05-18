@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to pysquirrel will be documented in this file.
+All notable changes to shikoko will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **Nullability inference (M4):** pysquirrel now automatically infers
+- **Nullability inference (M4):** shikoko now automatically infers
   whether a `SELECT` result column is nullable using three signals in
   priority order:
   1. Explicit `!` / `?` override suffixes on column aliases.
@@ -18,10 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   3. Fallback to `pg_attribute.attnotnull` from the catalog.
 - **Override markers:** append `!` to a column alias to force non-null,
   or `?` to force nullable. See `docs/annotations.md` for details.
-- **`nullability` module** (`src/pysquirrel/introspect/nullability.py`):
+- **`nullability` module** (`src/shikoko/introspect/nullability.py`):
   pure plan-tree walker, override stripping, and async inference
   orchestrator.
-- **`plan` module** (`src/pysquirrel/introspect/plan.py`): EXPLAIN plan
+- **`plan` module** (`src/shikoko/introspect/plan.py`): EXPLAIN plan
   parser, `run_explain` I/O runner with `GENERIC_PLAN` support, and
   `column_origins` for mapping plan outputs back to catalog metadata.
 - **`build_query_ir`** now integrates nullability inference end-to-end:

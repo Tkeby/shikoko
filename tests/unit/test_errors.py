@@ -1,13 +1,13 @@
-"""Unit tests for pysquirrel.errors — error hierarchy."""
+"""Unit tests for shikoko.errors — error hierarchy."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from pysquirrel.errors import (
+from shikoko.errors import (
     ConfigError,
     IntrospectionError,
-    PysquirrelError,
+    ShikokoError,
     QueryParseError,
     UnknownAnnotationError,
     UnsupportedTypeError,
@@ -24,7 +24,7 @@ class TestErrorHierarchy:
             ConfigError("no db"),
         ]
         for err in errors:
-            assert isinstance(err, PysquirrelError)
+            assert isinstance(err, ShikokoError)
 
     def test_query_parse_error_format(self) -> None:
         err = QueryParseError(Path("queries/a.sql"), 12, "unexpected token")

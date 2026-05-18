@@ -9,8 +9,8 @@ from pathlib import Path
 
 import asyncpg
 
-from pysquirrel.config import ConnectionSettings
-from pysquirrel.errors import IntrospectionError
+from shikoko.config import ConnectionSettings
+from shikoko.errors import IntrospectionError
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ async def create_pool(
                 file=Path(__file__),
                 message=(
                     f"PostgreSQL {major} is not supported; "
-                    f"pysquirrel requires PostgreSQL 16 or later "
+                    f"shikoko requires PostgreSQL 16 or later "
                     f"(server_version_num={version_num})"
                 ),
             )

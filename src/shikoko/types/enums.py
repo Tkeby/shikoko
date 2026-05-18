@@ -7,7 +7,7 @@ way built-in scalar OIDs are. The flow is:
     2. It asks the catalog cache whether the OID's ``typtype`` is ``'e'``.
     3. If yes, it asks for the variant labels (already cached after the
        first hit).
-    4. It builds an :class:`~pysquirrel.codegen.ir.EnumIR` and stashes
+    4. It builds an :class:`~shikoko.codegen.ir.EnumIR` and stashes
        it on the resolver so the renderer can emit it.
 
 The Python identifiers we emit follow standard PEP 8 enum-member style:
@@ -20,8 +20,8 @@ from __future__ import annotations
 
 import re
 
-from pysquirrel.codegen.ir import EnumIR
-from pysquirrel.codegen.naming import to_pascal_case
+from shikoko.codegen.ir import EnumIR
+from shikoko.codegen.naming import to_pascal_case
 
 __all__ = [
     "enum_py_name",
@@ -36,7 +36,7 @@ _LEADING_DIGIT = re.compile(r"^[0-9]")
 
 def enum_py_name(pg_name: str) -> str:
     """Convert a Postgres enum type name to a Python class name (PascalCase)."""
-    # Squirrel does not pluralise or otherwise mangle: `mood` -> `Mood`,
+    # Shikoko does not pluralise or otherwise mangle: `mood` -> `Mood`,
     # `user_status` -> `UserStatus`.
     return to_pascal_case(pg_name)
 

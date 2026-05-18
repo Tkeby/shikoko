@@ -1,19 +1,19 @@
-name: pysquirrel-demo
+name: shikoko-demo
 
 services:
   db:
     build: ../docker/postgres
-    container_name: pysquirrel-demo-db
+    container_name: shikoko-demo-db
     environment:
-      POSTGRES_USER: squirrel
-      POSTGRES_PASSWORD: squirrel
-      POSTGRES_DB: squirrel
+      POSTGRES_USER: shikoko
+      POSTGRES_PASSWORD: shikoko
+      POSTGRES_DB: shikoko
     ports:
       - "54324:5432"
     volumes:
-      - pysquirrel-demo-db-data:/var/lib/postgresql/data
+      - shikoko-demo-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U squirrel -d squirrel"]
+      test: ["CMD-SHELL", "pg_isready -U shikoko -d shikoko"]
       interval: 1s
       timeout: 5s
       retries: 30
@@ -21,9 +21,9 @@ services:
   app:
     build:
       context: ./app
-    container_name: pysquirrel-demo-app
+    container_name: shikoko-demo-app
     environment:
-      DATABASE_URL: postgresql://squirrel:squirrel@db:5432/squirrel
+      DATABASE_URL: postgresql://shikoko:shikoko@db:5432/shikoko
     ports:
       - "8000:8000"
     depends_on:
@@ -31,4 +31,4 @@ services:
         condition: service_healthy
 
 volumes:
-  pysquirrel-demo-db-data:
+  shikoko-demo-db-data:

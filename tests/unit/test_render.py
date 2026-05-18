@@ -1,9 +1,9 @@
-"""Unit tests for pysquirrel.codegen.render — IR → Python source."""
+"""Unit tests for shikoko.codegen.render — IR → Python source."""
 
 from __future__ import annotations
 
-from pysquirrel.codegen.ir import Field, Param, PyType, QueryIR, ReturnKind
-from pysquirrel.codegen.render import render_module
+from shikoko.codegen.ir import Field, Param, PyType, QueryIR, ReturnKind
+from shikoko.codegen.render import render_module
 
 
 def _make_query(

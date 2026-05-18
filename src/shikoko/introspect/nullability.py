@@ -1,7 +1,7 @@
 """Nullability inference for query result columns.
 
-This is a direct port of the algorithm in Squirrel's
-`src/squirrel/internal/database/postgres.gleam`. Given the RowDescription
+This is a direct port of the algorithm in Shikoko's
+`src/shikoko/internal/database/postgres.gleam`. Given the RowDescription
 returned by Postgres after preparing a statement plus the EXPLAIN plan
 for that statement, decide which output columns can be NULL.
 
@@ -16,7 +16,7 @@ The algorithm is four steps, in order:
          - Full Join:   every output of this node is nullable.
          - Right Join:  every output of the LEFT child is nullable.
          - Left Join:   every output of the RIGHT child is nullable.
-         - Semi Join:   treated like Left Join (Squirrel does this; in
+         - Semi Join:   treated like Left Join (Shikoko does this; in
                         practice semi joins don't surface columns from
                         the inner side, but the rule is safe).
          - Anti Join:   treated like inner — no contribution. Anti joins
@@ -48,8 +48,8 @@ from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import Protocol
 
-from pysquirrel.introspect.plan import Plan
-from pysquirrel.types.types import ColumnInfo
+from shikoko.introspect.plan import Plan
+from shikoko.types.types import ColumnInfo
 
 __all__ = [
     "AttnotnullLookup",
@@ -132,14 +132,14 @@ def nullables_from_plan(plan: Plan) -> set[int]:
     set positionally against their RowDescription / ColumnInfo list.
 
     Plan-node outputs are matched back to the root's output list by
-    exact string equality, mirroring Squirrel. Intermediate expressions
+    exact string equality, mirroring Shikoko. Intermediate expressions
     that don't appear in the root output are silently ignored — they
     were projected away before reaching the user-visible result, so
     their nullability is irrelevant.
     """
     # Build expression -> root-output index. If two root outputs share
     # the same expression text (rare but possible in pathological
-    # queries) the later one wins, matching Squirrel's `dict.insert`
+    # queries) the later one wins, matching Shikoko's `dict.insert`
     # fold-left behavior.
     output_to_idx: dict[str, int] = {expr: i for i, expr in enumerate(plan.output)}
     acc: set[int] = set()

@@ -1,12 +1,12 @@
-"""Unit tests for pysquirrel.types.oid_map — OID to Python type resolution."""
+"""Unit tests for shikoko.types.oid_map — OID to Python type resolution."""
 
 from __future__ import annotations
 
 import pytest
 
-from pysquirrel.codegen.ir import PyType
-from pysquirrel.errors import UnsupportedTypeError
-from pysquirrel.types.oid_map import resolve_type
+from shikoko.codegen.ir import PyType
+from shikoko.errors import UnsupportedTypeError
+from shikoko.types.oid_map import resolve_type
 
 
 class TestScalarTypes:

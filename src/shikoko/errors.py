@@ -5,11 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 
 
-class PysquirrelError(Exception):
-    """Base for all user-facing errors raised by pysquirrel."""
+class ShikokoError(Exception):
+    """Base for all user-facing errors raised by shikoko."""
 
 
-class QueryParseError(PysquirrelError):
+class QueryParseError(ShikokoError):
     """Raised when a ``.sql`` file cannot be parsed."""
 
     def __init__(self, file: Path, line: int, message: str) -> None:
@@ -19,7 +19,7 @@ class QueryParseError(PysquirrelError):
         super().__init__(f"{file}:{line}: {message}")
 
 
-class UnsupportedTypeError(PysquirrelError):
+class UnsupportedTypeError(ShikokoError):
     """Raised when a Postgres OID has no mapped Python type."""
 
     def __init__(self, file: Path, oid: int, pg_type_name: str) -> None:
@@ -29,7 +29,7 @@ class UnsupportedTypeError(PysquirrelError):
         super().__init__(f"{file}: unsupported type {pg_type_name} (oid {oid})")
 
 
-class IntrospectionError(PysquirrelError):
+class IntrospectionError(ShikokoError):
     """Raised when Postgres returns an error during introspection."""
 
     def __init__(self, file: Path, message: str) -> None:
@@ -38,7 +38,7 @@ class IntrospectionError(PysquirrelError):
         super().__init__(f"{file}: introspection failed: {message}")
 
 
-class UnknownAnnotationError(PysquirrelError):
+class UnknownAnnotationError(ShikokoError):
     """Raised when a query annotation is not recognised."""
 
     def __init__(self, file: Path, line: int, annotation: str) -> None:
@@ -48,7 +48,7 @@ class UnknownAnnotationError(PysquirrelError):
         super().__init__(f"{file}:{line}: unknown annotation: {annotation}")
 
 
-class ConfigError(PysquirrelError):
+class ConfigError(ShikokoError):
     """Raised when connection settings cannot be resolved."""
 
     def __init__(self, message: str) -> None:

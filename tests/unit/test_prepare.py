@@ -6,7 +6,7 @@ suffixes on column aliases and qualified column references.
 
 from __future__ import annotations
 
-from pysquirrel.introspect.prepare import (
+from shikoko.introspect.prepare import (
     _extract_overrides,
     _strip_override_suffixes,
 )

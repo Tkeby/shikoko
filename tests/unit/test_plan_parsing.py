@@ -1,10 +1,10 @@
-"""Unit tests for pysquirrel.introspect.plan — JSON → Plan tree parsing."""
+"""Unit tests for shikoko.introspect.plan — JSON → Plan tree parsing."""
 
 from __future__ import annotations
 
 import pytest
 
-from pysquirrel.introspect.plan import Plan, parse_plan_json
+from shikoko.introspect.plan import Plan, parse_plan_json
 
 # ---------------------------------------------------------------------------
 # Happy path

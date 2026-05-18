@@ -1,4 +1,4 @@
-"""Unit tests for pysquirrel.parser — SQL file parsing logic."""
+"""Unit tests for shikoko.parser — SQL file parsing logic."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from pysquirrel.errors import QueryParseError, UnknownAnnotationError
-from pysquirrel.parser import parse_sql_file
+from shikoko.errors import QueryParseError, UnknownAnnotationError
+from shikoko.parser import parse_sql_file
 
 
 def _write_sql(tmp_path: Path, name: str, content: str) -> Path:

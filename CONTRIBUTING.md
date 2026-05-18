@@ -1,6 +1,6 @@
-# Contributing to pysquirrel
+# Contributing to shikoko
 
-Thank you for your interest in contributing. pysquirrel is a type-safe Python
+Thank you for your interest in contributing. shikoko is a type-safe Python
 code generator for PostgreSQL queries, and every contribution — bug reports,
 documentation fixes, feature ideas, or pull requests — helps make it better.
 
@@ -19,8 +19,8 @@ conventions.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/tsegaw/pysquirrel.git
-cd pysquirrel
+git clone https://github.com/tsegaw/shikoko.git
+cd shikoko
 
 # 2. Create and activate a virtual environment
 python -m venv .venv
@@ -30,7 +30,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 
 # 4. Verify the CLI works
-pysquirrel --version
+shikoko --version
 
 # 5. Run the unit tests (no Docker needed)
 pytest tests/unit -q
@@ -41,7 +41,7 @@ If the unit tests pass, your environment is ready.
 ## Project structure
 
 ```
-src/pysquirrel/
+src/shikoko/
 ├── cli.py              # Typer CLI (generate, check)
 ├── config.py           # Connection string resolution
 ├── discovery.py        # Find sql/ dirs and .sql files
@@ -131,7 +131,7 @@ docker compose -f example/docker-compose.yml down
 ```
 
 The integration test database runs on `localhost:54323` with credentials
-`squirrel:squirrel`. The `conftest.py` fixture uses `skip_no_db` to skip
+`shikoko:shikoko`. The `conftest.py` fixture uses `skip_no_db` to skip
 integration tests cleanly when Postgres is unreachable, so the test suite never
 fails just because Docker is not running.
 
@@ -161,7 +161,7 @@ Configuration lives in `pyproject.toml` under `[tool.ruff]`. The line length is
 
 ### Type checking
 
-Type safety is a core goal of pysquirrel. Please run at least one type checker
+Type safety is a core goal of shikoko. Please run at least one type checker
 before opening a PR:
 
 ```bash
@@ -188,7 +188,7 @@ function should have full type annotations.
 
 ## How to add a new Postgres type mapping
 
-Type mappings live in `src/pysquirrel/types/oid_map.py`. The file contains two
+Type mappings live in `src/shikoko/types/oid_map.py`. The file contains two
 lookup tables:
 
 - `BUILTIN_OIDS` — maps scalar type OIDs to `PyType` instances
@@ -201,7 +201,7 @@ To add a new type:
 2. Add an entry to `BUILTIN_OIDS`:
 
 ```python
-from pysquirrel.codegen.ir import PyType
+from shikoko.codegen.ir import PyType
 
 _MY_IMPORT = frozenset({"from mymodule import MyType"})
 
@@ -229,7 +229,7 @@ _BUILTIN_ARRAY_OIDS: dict[int, int] = {
 
 ## How to add a new annotation
 
-Annotations are special `--` comments that pysquirrel parses from the leading
+Annotations are special `--` comments that shikoko parses from the leading
 comment block of a `.sql` file. The current system supports:
 
 - `-- name: <query_name>` — override the function name
@@ -243,7 +243,7 @@ To add a new annotation:
 
 2. **Update `parser.py`:**
    - Add the annotation name to `_KNOWN_ANNOTATIONS` in
-     `src/pysquirrel/parser.py`.
+     `src/shikoko/parser.py`.
    - Add parsing logic in the `parse_sql_file` function if the annotation takes
      a value.
 
@@ -288,12 +288,12 @@ To add a new annotation:
 ## Reporting issues
 
 If you find a bug or have a feature request, please open an issue on
-[GitHub Issues](https://github.com/tsegaw/pysquirrel/issues) with:
+[GitHub Issues](https://github.com/tsegaw/shikoko/issues) with:
 
 - A clear title and description.
 - Steps to reproduce (for bugs), including the `.sql` file content and the
   generated output.
-- The Python version, pysquirrel version, and PostgreSQL version you are using.
+- The Python version, shikoko version, and PostgreSQL version you are using.
 - Any relevant error messages or stack traces.
 
 When reporting a type mapping issue, include the Postgres type OID if possible
@@ -302,5 +302,5 @@ When reporting a type mapping issue, include the Postgres type OID if possible
 
 ## License
 
-By contributing to pysquirrel, you agree that your contributions will be
-licensed under the [MIT License](https://github.com/tsegaw/pysquirrel/blob/main/LICENSE).
+By contributing to shikoko, you agree that your contributions will be
+licensed under the [MIT License](https://github.com/tsegaw/shikoko/blob/main/LICENSE).

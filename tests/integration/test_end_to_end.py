@@ -11,12 +11,12 @@ from pathlib import Path
 import asyncpg
 import pytest
 
-from pysquirrel.codegen.format import format_source
-from pysquirrel.codegen.render import render_module
-from pysquirrel.discovery import find_sql_files
-from pysquirrel.introspect.prepare import build_query_ir
-from pysquirrel.parser import parse_sql_file
-from pysquirrel.types.oid_map import resolve_type
+from shikoko.codegen.format import format_source
+from shikoko.codegen.render import render_module
+from shikoko.discovery import find_sql_files
+from shikoko.introspect.prepare import build_query_ir
+from shikoko.parser import parse_sql_file
+from shikoko.types.oid_map import resolve_type
 
 
 def _pg_reachable() -> bool:

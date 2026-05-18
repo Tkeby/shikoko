@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pysquirrel"
+name = "shikoko"
 version = "0.1.0"
 description = "Type-safe Python code generator for PostgreSQL queries."
 readme = "README.md"
@@ -42,16 +42,16 @@ dev = [
 ]
 
 [project.scripts]
-pysquirrel = "pysquirrel.cli:main"
+shikoko = "shikoko.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Tkeby/pysquirrel"
-Repository = "https://github.com/Tkeby/pysquirrel"
-Issues = "https://github.com/Tkeby/pysquirrel/issues"
-Changelog = "https://github.com/Tkeby/pysquirrel/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Tkeby/shikoko"
+Repository = "https://github.com/Tkeby/shikoko"
+Issues = "https://github.com/Tkeby/shikoko/issues"
+Changelog = "https://github.com/Tkeby/shikoko/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pysquirrel"]
+packages = ["src/shikoko"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

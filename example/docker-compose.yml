@@ -1,23 +1,23 @@
-name: squirrel-test
+name: shikoko-test
 
 # Dedicated Postgres for the pytest suite and demo app:
 services:
   db:
     build: ./docker/postgres
-    container_name: squirrel-test-db
+    container_name: shikoko-test-db
     environment:
-      POSTGRES_USER: squirrel
-      POSTGRES_PASSWORD: squirrel
-      POSTGRES_DB: squirrel
+      POSTGRES_USER: shikoko
+      POSTGRES_PASSWORD: shikoko
+      POSTGRES_DB: shikoko
     ports:
       - "54323:5432"
     volumes:
-      - squirrel-test-db-data:/var/lib/postgresql/data
+      - shikoko-test-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U squirrel -d squirrel"]
+      test: ["CMD-SHELL", "pg_isready -U shikoko -d shikoko"]
       interval: 1s
       timeout: 5s
       retries: 30
 
 volumes:
-  squirrel-test-db-data:
+  shikoko-test-db-data:

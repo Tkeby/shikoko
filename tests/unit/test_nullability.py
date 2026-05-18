@@ -7,15 +7,15 @@ attnotnull lookup. No Postgres needed.
 
 from __future__ import annotations
 
-from pysquirrel.introspect.nullability import (
+from shikoko.introspect.nullability import (
     NullabilityDecision,
     apply_overrides,
     infer_nullability,
     make_dict_lookup,
     strip_override_suffix,
 )
-from pysquirrel.introspect.plan import Plan
-from pysquirrel.types.types import ColumnInfo
+from shikoko.introspect.plan import Plan
+from shikoko.types.types import ColumnInfo
 
 # ---------------------------------------------------------------------------
 # strip_override_suffix

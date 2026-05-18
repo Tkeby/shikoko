@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from pysquirrel.errors import ConfigError
+from shikoko.errors import ConfigError
 
 _DEFAULT_HOST = "localhost"
 _DEFAULT_PORT = 5432
