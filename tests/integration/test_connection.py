@@ -1,6 +1,6 @@
-"""Integration tests for pysquirrel.introspect.connection — real pool lifecycle.
+"""Integration tests for shikoko.introspect.connection — real pool lifecycle.
 
-Requires the ``squirrel-test-db`` container running on localhost:54323.
+Requires the ``shikoko-test-db`` container running on localhost:54323.
 The test skips cleanly if the database is unreachable (no Docker, no Postgres).
 """
 
@@ -11,14 +11,14 @@ from pathlib import Path
 
 import pytest
 
-from pysquirrel.config import ConnectionSettings
+from shikoko.config import ConnectionSettings
 
 try:
-    from pysquirrel.introspect.connection import connect_pool, create_pool
+    from shikoko.introspect.connection import connect_pool, create_pool
 except ImportError:
     pytest.skip("asyncpg not available", allow_module_level=True)
 
-_DSN = "postgresql://squirrel:squirrel@localhost:54323/squirrel"
+_DSN = "postgresql://shikoko:shikoko@localhost:54323/shikoko"
 
 
 def _test_dsn() -> str | None:
@@ -35,7 +35,7 @@ def dsn() -> str | None:
 def settings(dsn: str | None) -> ConnectionSettings | None:
     if dsn is None:
         return None
-    from pysquirrel.config import _parse_dsn
+    from shikoko.config import _parse_dsn
 
     return _parse_dsn(dsn)
 
@@ -65,9 +65,9 @@ async def test_create_pool_connects(settings: ConnectionSettings) -> None:
         settings = ConnectionSettings(
             host="localhost",
             port=54323,
-            user="squirrel",
-            password="squirrel",
-            database="squirrel",
+            user="shikoko",
+            password="shikoko",
+            database="shikoko",
         )
     pool = await create_pool(settings)
     try:
@@ -84,9 +84,9 @@ async def test_connect_pool_context_manager(settings: ConnectionSettings) -> Non
         settings = ConnectionSettings(
             host="localhost",
             port=54323,
-            user="squirrel",
-            password="squirrel",
-            database="squirrel",
+            user="shikoko",
+            password="shikoko",
+            database="shikoko",
         )
     async with connect_pool(settings) as pool:
         val = await pool.fetchval("select 42")
@@ -95,7 +95,7 @@ async def test_connect_pool_context_manager(settings: ConnectionSettings) -> Non
 
 @skip_no_pg
 async def test_generate_connects_and_exits(tmp_path: Path) -> None:
-    """M1 acceptance: ``pysquirrel generate`` connects to a database and exits cleanly."""
+    """M1 acceptance: ``shikoko generate`` connects to a database and exits cleanly."""
     import subprocess
     import sys
 
@@ -105,7 +105,7 @@ async def test_generate_connects_and_exits(tmp_path: Path) -> None:
     (sql_dir / "dummy.sql").write_text("select 1 as val\n", encoding="utf-8")
 
     dsn = _test_dsn()
-    cmd = [sys.executable, "-m", "pysquirrel", "generate", "--root", str(tmp_path)]
+    cmd = [sys.executable, "-m", "shikoko", "generate", "--root", str(tmp_path)]
     cmd.extend(["--database-url", dsn or _DSN])
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)

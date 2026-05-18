@@ -1,7 +1,7 @@
 # Troubleshooting
 
 This guide covers the most common errors and issues encountered when using
-pysquirrel, along with their causes and fixes.
+shikoko, along with their causes and fixes.
 
 ---
 
@@ -31,7 +31,7 @@ pysquirrel, along with their causes and fixes.
 No .sql files found under any sql/ directory.
 ```
 
-**Cause:** pysquirrel recursively searches your project root for directories
+**Cause:** shikoko recursively searches your project root for directories
 literally named `sql/` and looks for `.sql` files **directly** inside them.
 Files nested in subdirectories of `sql/` (such as `sql/queries/list_users.sql`)
 are **not** discovered.
@@ -74,7 +74,7 @@ Error: no database name resolved. Use --database-url, set DATABASE_URL,
 PGDATABASE, or run from a directory with a pyproject.toml.
 ```
 
-**Cause:** pysquirrel could not determine which database to connect to. The
+**Cause:** shikoko could not determine which database to connect to. The
 database name is resolved through the following precedence chain:
 
 1. `--database-url` CLI flag
@@ -83,24 +83,24 @@ database name is resolved through the following precedence chain:
 4. `[project].name` from `pyproject.toml` (hyphens replaced with underscores)
 5. Current working directory name
 
-If none of these provide a database name, pysquirrel exits with this error.
+If none of these provide a database name, shikoko exits with this error.
 
 **Fix:** Use any one of these approaches:
 
 ```bash
 # Option A: pass the full DSN
-pysquirrel generate --database-url postgresql://user:pass@localhost:5432/mydb
+shikoko generate --database-url postgresql://user:pass@localhost:5432/mydb
 
 # Option B: set the environment variable
 export DATABASE_URL=postgresql://user:pass@localhost:5432/mydb
-pysquirrel generate
+shikoko generate
 
 # Option C: use libpq-style env vars
 export PGDATABASE=mydb
-pysquirrel generate
+shikoko generate
 
 # Option D: rely on pyproject.toml
-# With [project] name = "mydb" in pyproject.toml, pysquirrel uses "mydb"
+# With [project] name = "mydb" in pyproject.toml, shikoko uses "mydb"
 ```
 
 ---
@@ -115,7 +115,7 @@ pysquirrel generate
 
 Or a raw asyncpg connection error.
 
-**Cause:** pysquirrel cannot reach the Postgres server. Common reasons:
+**Cause:** shikoko cannot reach the Postgres server. Common reasons:
 
 - Postgres is not running
 - Wrong host or port
@@ -135,19 +135,19 @@ Or a raw asyncpg connection error.
    psql "postgresql://user:pass@localhost:5432/mydb"
    ```
 
-3. If `psql` fails too, the problem is outside pysquirrel — fix your Postgres
+3. If `psql` fails too, the problem is outside shikoko — fix your Postgres
    configuration, credentials, or network first.
 
 4. If you are using Docker, make sure the port is published (`-p 5432:5432`)
    and the container is healthy.
 
-**Note on Postgres version:** pysquirrel requires PostgreSQL 16 or later
+**Note on Postgres version:** shikoko requires PostgreSQL 16 or later
 because it uses `EXPLAIN (FORMAT JSON, VERBOSE, GENERIC_PLAN)`. Connecting to
 an older server produces:
 
 ```
 <introspection>: introspection failed: PostgreSQL 15 is not supported;
-pysquirrel requires PostgreSQL 16 or later (server_version_num=150000)
+shikoko requires PostgreSQL 16 or later (server_version_num=150000)
 ```
 
 ---
@@ -160,7 +160,7 @@ pysquirrel requires PostgreSQL 16 or later (server_version_num=150000)
 <introspection>: unsupported type my_composite (oid 12345)
 ```
 
-**Cause:** The query selects a column whose Postgres type is not in pysquirrel's
+**Cause:** The query selects a column whose Postgres type is not in shikoko's
 built-in OID map and is not an enum. The following type categories are **not
 supported**:
 
@@ -192,7 +192,7 @@ select id, email::text as email from users;
 select id, active_period::text as active_period from subscriptions;
 ```
 
-For the specific case of Postgres enums, pysquirrel handles them automatically
+For the specific case of Postgres enums, shikoko handles them automatically
 — no cast is needed.
 
 ---
@@ -226,25 +226,25 @@ left join users u on u.id = o.user_id;
 
 ---
 
-### 6. `pysquirrel check` fails in CI but works locally
+### 6. `shikoko check` fails in CI but works locally
 
-**Symptom:** `pysquirrel check` exits with code 1 in CI, showing diffs, but
+**Symptom:** `shikoko check` exits with code 1 in CI, showing diffs, but
 passes on your local machine.
 
 **Cause:** The most likely cause is a different database schema between your
-local Postgres and the CI database. pysquirrel introspects the live database,
+local Postgres and the CI database. shikoko introspects the live database,
 so the generated code reflects the schema it sees — column types, nullability
 constraints, and enum definitions all come from the database catalog.
 
 If the `.sql` files have not changed (same content, same paths), the hash
-short-circuit in `pysquirrel check` kicks in and no database query is needed.
-If the files *have* changed (or are new), pysquirrel queries the database,
+short-circuit in `shikoko check` kicks in and no database query is needed.
+If the files *have* changed (or are new), shikoko queries the database,
 and any schema difference will produce different output.
 
 **Fix:**
 
 - Ensure CI uses the same schema as your local database. Apply migrations
-  before running `pysquirrel check` in CI.
+  before running `shikoko check` in CI.
 - The hash short-circuit means if `.sql` files haven't changed, the database
   isn't queried at all — so a schema mismatch only matters when `.sql` files
   change.
@@ -263,7 +263,7 @@ and any schema difference will produce different output.
 ruff not found on PATH; returning unformatted output
 ```
 
-**Cause:** pysquirrel pipes generated Python source through `ruff format` for
+**Cause:** shikoko pipes generated Python source through `ruff format` for
 consistent formatting. If `ruff` is not on `PATH`, the unformatted source is
 written instead.
 
@@ -298,7 +298,7 @@ ModuleNotFoundError: No module named 'pydantic'
 
 **Cause:** Generated modules import `asyncpg` and `pydantic` at the top level.
 These must be installed in the environment where the generated code runs.
-pysquirrel itself is only needed at code-generation time, not at runtime.
+shikoko itself is only needed at code-generation time, not at runtime.
 
 **Fix:**
 
@@ -316,8 +316,8 @@ under `[project] dependencies`).
 **Symptom:** Two enum members in the same Postgres enum type produce Python
 identifiers that look like they would collide, but the generated code works.
 
-**Cause:** pysquirrel normalizes Postgres enum labels to upper-snake-case
-Python identifiers. If two labels normalize to the same identifier, pysquirrel
+**Cause:** shikoko normalizes Postgres enum labels to upper-snake-case
+Python identifiers. If two labels normalize to the same identifier, shikoko
 appends a numeric suffix (`_2`, `_3`, ...) to the second and subsequent
 collisions.
 
@@ -327,7 +327,7 @@ collisions.
 CREATE TYPE confusing AS ENUM ('foo-bar', 'foo_bar', 'foo bar');
 ```
 
-All three labels normalize to `FOO_BAR`. pysquirrel generates:
+All three labels normalize to `FOO_BAR`. shikoko generates:
 
 ```python
 class Confusing(StrEnum):
@@ -336,7 +336,7 @@ class Confusing(StrEnum):
     FOO_BAR_3 = 'foo bar'
 ```
 
-**Fix:** No action needed — pysquirrel handles this automatically. If the
+**Fix:** No action needed — shikoko handles this automatically. If the
 resulting names are confusing, consider renaming the Postgres enum labels to
 avoid ambiguity.
 
@@ -348,10 +348,10 @@ avoid ambiguity.
 (`T | None = None`) when using a `DO` block, multi-statement body, or other
 utility command.
 
-**Cause:** pysquirrel runs `EXPLAIN (FORMAT JSON, VERBOSE, GENERIC_PLAN)` on
+**Cause:** shikoko runs `EXPLAIN (FORMAT JSON, VERBOSE, GENERIC_PLAN)` on
 each query to infer nullability. Postgres refuses to plan `DO` blocks and
 multi-statement bodies (returning SQLSTATE `0A000` or `42601`). When `EXPLAIN`
-fails, pysquirrel falls back to treating every column as nullable — this is
+fails, shikoko falls back to treating every column as nullable — this is
 the conservative default.
 
 **Fix:**
@@ -359,7 +359,7 @@ the conservative default.
 - Split multi-statement bodies into individual `.sql` files, each containing
   a single query.
 - For `DO` blocks, consider whether a PL/pgSQL function is a better fit.
-  pysquirrel is designed for `SELECT`, `INSERT ... RETURNING`, `UPDATE ...
+  shikoko is designed for `SELECT`, `INSERT ... RETURNING`, `UPDATE ...
   RETURNING`, and `DELETE ... RETURNING` — not for anonymous blocks.
 - Use explicit `!` overrides to force non-nullable columns:
   ```sql
@@ -373,36 +373,36 @@ the conservative default.
 **Symptom:** Columns that should be non-nullable are typed as nullable, and
 no other cause applies.
 
-**Cause:** pysquirrel uses `GENERIC_PLAN` (Postgres 16+) to avoid needing
+**Cause:** shikoko uses `GENERIC_PLAN` (Postgres 16+) to avoid needing
 concrete parameter values. Some SQL constructs fail under `GENERIC_PLAN` —
 for example, CTEs that reference parameters in ways the planner cannot
-generalize. When this happens, pysquirrel falls back gracefully: the plan is
+generalize. When this happens, shikoko falls back gracefully: the plan is
 `None`, and all columns default to nullable.
 
-**Fix:** This is handled automatically by pysquirrel. If the resulting
+**Fix:** This is handled automatically by shikoko. If the resulting
 nullability is too conservative, add `!` overrides to the affected columns.
 
 ---
 
 ### 12. Generated file changes between runs with no SQL changes
 
-**Symptom:** Running `pysquirrel generate` twice produces different output
+**Symptom:** Running `shikoko generate` twice produces different output
 even though no `.sql` files changed.
 
 **Cause — timestamp header:** The generated file includes a `# generated at:`
-header with a UTC timestamp. This changes on every run, but `pysquirrel check`
+header with a UTC timestamp. This changes on every run, but `shikoko check`
 ignores it (it compares content after regeneration, and the hash short-circuit
 prevents regeneration when sources have not changed).
 
 **Cause — actual code changes:** If the generated Python code itself differs
 between runs (not just the timestamp), check for:
 
-- **Non-deterministic ordering:** pysquirrel sorts queries alphabetically by
+- **Non-deterministic ordering:** shikoko sorts queries alphabetically by
   name, so this should not happen. If it does, it is a bug — please file an
   issue.
 - **Database schema changes:** If someone altered a table, enum, or constraint
   between runs, the generated code will reflect the new schema.
-- **Enum label ordering:** pysquirrel uses `enumsortorder` from `pg_enum`,
+- **Enum label ordering:** shikoko uses `enumsortorder` from `pg_enum`,
   which is stable — so this should not cause differences.
 
 **Fix:** If only the timestamp differs, this is expected and harmless. If the
@@ -415,14 +415,14 @@ that no `.sql` file content has changed (including whitespace).
 
 ### Enable verbose logging
 
-pysquirrel uses Python's standard `logging` module. To see debug output, set
+shikoko uses Python's standard `logging` module. To see debug output, set
 the log level before running:
 
 ```bash
-# Show all pysquirrel log messages (INFO and above)
+# Show all shikoko log messages (INFO and above)
 PYTHONPATH=src python -c "
 import logging; logging.basicConfig(level=logging.DEBUG)
-from pysquirrel.cli import main; main()
+from shikoko.cli import main; main()
 " generate --database-url postgresql://user:pass@localhost/mydb
 ```
 
@@ -430,16 +430,16 @@ Or configure logging via environment variable:
 
 ```bash
 # With Python 3.11+ you can use the -X log option
-python -X log=DEBUG -m pysquirrel generate
+python -X log=DEBUG -m shikoko generate
 ```
 
-Loggers used by pysquirrel:
+Loggers used by shikoko:
 
 | Logger | Purpose |
 |---|---|
-| `pysquirrel.codegen.format` | `ruff format` invocation and fallback |
-| `pysquirrel.introspect.connection` | Connection pool lifecycle, server version checks |
-| `pysquirrel.introspect.prepare` | Statement preparation, parameter introspection |
+| `shikoko.codegen.format` | `ruff format` invocation and fallback |
+| `shikoko.introspect.connection` | Connection pool lifecycle, server version checks |
+| `shikoko.introspect.prepare` | Statement preparation, parameter introspection |
 
 ### Test the connection independently
 
@@ -449,7 +449,7 @@ If you suspect a connection issue, test the same DSN with `psql`:
 psql "postgresql://user:pass@localhost:5432/mydb" -c "SELECT version();"
 ```
 
-If `psql` cannot connect, pysquirrel will not be able to either.
+If `psql` cannot connect, shikoko will not be able to either.
 
 ### Verify SQL syntax
 
@@ -473,17 +473,17 @@ The generated file is plain Python. Open it in your editor or run:
 python -c "import sql_generated; print(sql_generated.__file__)"
 ```
 
-If the file is missing entirely, `pysquirrel generate` may not have found any
+If the file is missing entirely, `shikoko generate` may not have found any
 `.sql` files — see [section 1](#1-no-sql-files-found).
 
 ### Check the hash header
 
 The generated file includes a `# hash:` line with a SHA-256 digest of the
-source `.sql` files. This is used by `pysquirrel check` to skip database
+source `.sql` files. This is used by `shikoko check` to skip database
 queries when nothing has changed:
 
 ```python
-# AUTO-GENERATED by pysquirrel — do not edit manually.
+# AUTO-GENERATED by shikoko — do not edit manually.
 # source: sql
 # generated at: 2025-01-15 10:30:00 UTC
 # hash: a1b2c3d4e5f6...
@@ -496,43 +496,43 @@ changed since the last generation.
 
 ## FAQ
 
-### Does pysquirrel support views?
+### Does shikoko support views?
 
-Yes. Views are introspected the same way as tables. pysquirrel sees whatever
+Yes. Views are introspected the same way as tables. shikoko sees whatever
 columns and types the view exposes through `PREPARE`/`EXPLAIN`.
 
-### Does pysquirrel support functions or stored procedures?
+### Does shikoko support functions or stored procedures?
 
-pysquirrel can introspect `SELECT * FROM my_function()` like any other query.
+shikoko can introspect `SELECT * FROM my_function()` like any other query.
 However, `DO` blocks and `CALL` statements cannot be `EXPLAIN`ed, so
 nullability inference falls back to "everything nullable" for those.
 
 ### What happens if I edit the generated file by hand?
 
-Your changes will be overwritten the next time `pysquirrel generate` runs. The
-file header warns: `AUTO-GENERATED by pysquirrel — do not edit manually.` Use
-`pysquirrel check` in CI to catch accidental edits.
+Your changes will be overwritten the next time `shikoko generate` runs. The
+file header warns: `AUTO-GENERATED by shikoko — do not edit manually.` Use
+`shikoko check` in CI to catch accidental edits.
 
-### Can I use pysquirrel with Django, SQLAlchemy, or another ORM?
+### Can I use shikoko with Django, SQLAlchemy, or another ORM?
 
-pysquirrel generates standalone `asyncpg`-based code. It does not integrate
+shikoko generates standalone `asyncpg`-based code. It does not integrate
 with ORM query sets or model definitions. You can use both in the same project
 — just don't mix them on the same connection.
 
 ### What Python version is required?
 
-pysquirrel generates code targeting Python 3.10+ (uses `X | Y` union syntax
+shikoko generates code targeting Python 3.10+ (uses `X | Y` union syntax
 and `list[T]` generic syntax without `from __future__ import annotations`).
 
 ### What Postgres version is required?
 
-PostgreSQL 16 or later. pysquirrel uses `EXPLAIN (FORMAT JSON, VERBOSE,
+PostgreSQL 16 or later. shikoko uses `EXPLAIN (FORMAT JSON, VERBOSE,
 GENERIC_PLAN)`, which requires the `GENERIC_PLAN` option introduced in
 Postgres 16.
 
-### Can I run pysquirrel without a database?
+### Can I run shikoko without a database?
 
-No. pysquirrel connects to a live Postgres instance to introspect query types
-and nullability. However, the hash short-circuit in `pysquirrel check` means
+No. shikoko connects to a live Postgres instance to introspect query types
+and nullability. However, the hash short-circuit in `shikoko check` means
 that when `.sql` files have not changed, no database query is needed — making
 CI fast for the common case.

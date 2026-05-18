@@ -9,7 +9,7 @@ import socket
 
 import pytest
 
-from pysquirrel.introspect.plan import Plan, column_origins, run_explain
+from shikoko.introspect.plan import Plan, column_origins, run_explain
 
 
 def _pg_reachable() -> bool:

@@ -1,11 +1,11 @@
-# pysquirrel Demo — FastAPI App
+# shikoko Demo — FastAPI App
 
-A minimal FastAPI application that demonstrates pysquirrel's workflow:
+A minimal FastAPI application that demonstrates shikoko's workflow:
 
 1. Write SQL queries in `sql/*.sql` files.
-2. Run `pysquirrel generate` to produce `sql_generated.py`.
+2. Run `shikoko generate` to produce `sql_generated.py`.
 3. Import and use the generated async functions in your app.
-4. Run `pysquirrel check` in CI to verify generated files are up to date.
+4. Run `shikoko check` in CI to verify generated files are up to date.
 
 ## Quick Start
 
@@ -21,16 +21,16 @@ docker compose -f docker-compose.yml logs -f db
 ### 2. Apply the schema
 
 ```bash
-psql postgresql://squirrel:squirrel@localhost:54323/squirrel \
+psql postgresql://shikoko:shikoko@localhost:54323/shikoko \
   -f app/migrations/001_init.sql
 ```
 
 ### 3. Generate the query module
 
 ```bash
-# From the project root (or install pysquirrel first: pip install -e .)
-pysquirrel generate --root example/app/ \
-  --database-url postgresql://squirrel:squirrel@localhost:54323/squirrel
+# From the project root (or install shikoko first: pip install -e .)
+shikoko generate --root example/app/ \
+  --database-url postgresql://shikoko:shikoko@localhost:54323/shikoko
 ```
 
 This creates `example/app/sql_generated.py` containing:
@@ -42,7 +42,7 @@ This creates `example/app/sql_generated.py` containing:
 ```bash
 cd example/app
 pip install fastapi uvicorn asyncpg
-DATABASE_URL=postgresql://squirrel:squirrel@localhost:54323/squirrel \
+DATABASE_URL=postgresql://shikoko:shikoko@localhost:54323/shikoko \
   uvicorn main:app --reload
 ```
 
@@ -67,7 +67,7 @@ curl http://localhost:8000/users/1/posts
 curl http://localhost:8000/health
 ```
 
-## CI Gate: `pysquirrel check`
+## CI Gate: `shikoko check`
 
 The `check` subcommand regenerates the Python module in-memory and diffs it
 against the existing file. If they differ, it exits 1 with a unified diff —
@@ -75,14 +75,14 @@ perfect for CI:
 
 ```bash
 # In CI:
-pysquirrel check --root example/app/ \
-  --database-url postgresql://squirrel:squirrel@localhost:54323/squirrel
+shikoko check --root example/app/ \
+  --database-url postgresql://shikoko:shikoko@localhost:54323/shikoko
 ```
 
 If someone edits a `.sql` file but forgets to regenerate, CI catches it:
 
 ```bash
-$ pysquirrel check --root example/app/ --database-url ...
+$ shikoko check --root example/app/ --database-url ...
 --- a/example/app/sql_generated.py
 +++ b/example/app/sql_generated.py
 @@ ... @@

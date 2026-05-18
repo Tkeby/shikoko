@@ -1,4 +1,4 @@
-"""Unit tests for pysquirrel.config — connection resolution logic."""
+"""Unit tests for shikoko.config — connection resolution logic."""
 
 from __future__ import annotations
 
@@ -8,14 +8,14 @@ from unittest.mock import patch
 
 import pytest
 
-from pysquirrel.config import (
+from shikoko.config import (
     ConnectionSettings,
     ProjectSettings,
     _parse_dsn,
     resolve_connection,
     resolve_project,
 )
-from pysquirrel.errors import ConfigError
+from shikoko.errors import ConfigError
 
 # ---------------------------------------------------------------------------
 # _parse_dsn

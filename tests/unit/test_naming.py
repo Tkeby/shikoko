@@ -1,10 +1,10 @@
-"""Unit tests for pysquirrel.codegen.naming — identifier conversion."""
+"""Unit tests for shikoko.codegen.naming — identifier conversion."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from pysquirrel.codegen.naming import (
+from shikoko.codegen.naming import (
     row_model_name,
     to_module_name,
     to_pascal_case,

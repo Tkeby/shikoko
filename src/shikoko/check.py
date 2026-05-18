@@ -9,13 +9,13 @@ from pathlib import Path
 
 import asyncpg
 
-from pysquirrel.codegen.format import format_source
-from pysquirrel.codegen.render import render_module
-from pysquirrel.config import ConnectionSettings
-from pysquirrel.discovery import find_sql_directories, find_sql_files
-from pysquirrel.introspect.catalog import CatalogCache
-from pysquirrel.introspect.prepare import TypeResolver, build_query_ir
-from pysquirrel.parser import parse_sql_file
+from shikoko.codegen.format import format_source
+from shikoko.codegen.render import render_module
+from shikoko.config import ConnectionSettings
+from shikoko.discovery import find_sql_directories, find_sql_files
+from shikoko.introspect.catalog import CatalogCache
+from shikoko.introspect.prepare import TypeResolver, build_query_ir
+from shikoko.parser import parse_sql_file
 
 
 @dataclass
@@ -84,7 +84,7 @@ async def check_pipeline(
 
     Returns a :class:`CheckResult` summarising all differences.
     """
-    from pysquirrel.introspect.connection import connect_pool
+    from shikoko.introspect.connection import connect_pool
 
     sql_files = find_sql_files(project_root)
     if not sql_files:

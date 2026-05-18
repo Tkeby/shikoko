@@ -1,7 +1,7 @@
 """Prepare a SQL statement via asyncpg and extract column/parameter metadata.
 
 Param nullability is deliberately left as ``True`` for M4 — Postgres
-doesn't give us NOT NULL info on parameters, and Squirrel doesn't
+doesn't give us NOT NULL info on parameters, and Shikoko doesn't
 infer it either.
 """
 
@@ -14,21 +14,21 @@ from pathlib import Path
 
 import asyncpg
 
-from pysquirrel.codegen.ir import EnumIR, Field, Param, PyType, QueryIR, ReturnKind
-from pysquirrel.codegen.naming import row_model_name
-from pysquirrel.errors import IntrospectionError, UnsupportedTypeError
-from pysquirrel.introspect.catalog import CatalogCache, TypeInfo
-from pysquirrel.introspect.nullability import infer_nullability
-from pysquirrel.introspect.plan import column_origins, run_explain
-from pysquirrel.parser import ParsedQuery
-from pysquirrel.types.enums import build_enum_ir
-from pysquirrel.types.oid_map import (
+from shikoko.codegen.ir import EnumIR, Field, Param, PyType, QueryIR, ReturnKind
+from shikoko.codegen.naming import row_model_name
+from shikoko.errors import IntrospectionError, UnsupportedTypeError
+from shikoko.introspect.catalog import CatalogCache, TypeInfo
+from shikoko.introspect.nullability import infer_nullability
+from shikoko.introspect.plan import column_origins, run_explain
+from shikoko.parser import ParsedQuery
+from shikoko.types.enums import build_enum_ir
+from shikoko.types.oid_map import (
     is_array_oid,
     resolve_builtin,
     resolve_type,
     wrap_array,
 )
-from pysquirrel.types.types import ColumnInfo, ParamInfo
+from shikoko.types.types import ColumnInfo, ParamInfo
 
 logger = logging.getLogger(__name__)
 
@@ -207,10 +207,10 @@ def _split_select_items(clause: str) -> list[str]:
 
 
 def _strip_override_suffixes(sql: str) -> str:
-    """Remove pysquirrel ``!``/``?`` override suffixes from column aliases.
+    """Remove shikoko ``!``/``?`` override suffixes from column aliases.
 
     Postgres doesn't understand ``!``/``?`` as part of an identifier.
-    These are pysquirrel-specific annotations that must be stripped
+    These are shikoko-specific annotations that must be stripped
     before sending the SQL to ``conn.prepare()``. The suffix is stripped
     from two positions:
 
@@ -232,7 +232,7 @@ async def _prepare_raw(
         columns: list of (name, oid, kind) for each result column.
         params: list of (oid, kind) for each parameter.
     """
-    # Strip pysquirrel-specific ``!``/``?`` override suffixes from
+    # Strip shikoko-specific ``!``/``?`` override suffixes from
     # column aliases before preparing — Postgres doesn't understand them.
     # Capture the suffixes first so we can re-apply them to the column
     # names returned by asyncpg (which sees the stripped aliases).
@@ -280,7 +280,7 @@ class TypeResolver:
 
     Built-in OIDs (numeric, text, datetime, etc.) and built-in array
     OIDs are answered from the static table in
-    :mod:`pysquirrel.types.oid_map`. Anything else — enums, arrays of
+    :mod:`shikoko.types.oid_map`. Anything else — enums, arrays of
     user-defined types — is resolved by querying ``pg_type`` via the
     :class:`CatalogCache`.
 

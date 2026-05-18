@@ -7,7 +7,7 @@ COPY pyproject.toml .
 RUN pip install --no-cache-dir .
 
 # The generated sql_generated.py is created at build time by
-# `pysquirrel generate`, so it must exist before this COPY.
+# `shikoko generate`, so it must exist before this COPY.
 COPY migrations/ migrations/
 COPY sql/ sql/
 COPY sql_generated.py sql_generated.py

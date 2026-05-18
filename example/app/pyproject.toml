@@ -1,7 +1,7 @@
 [project]
-name = "pysquirrel-demo"
+name = "shikoko-demo"
 version = "0.1.0"
-description = "Demo FastAPI app showing pysquirrel in action."
+description = "Demo FastAPI app showing shikoko in action."
 requires-python = ">=3.10"
 
 dependencies = [
@@ -13,7 +13,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pysquirrel",
+    "shikoko",
     "httpx >= 0.27",
     "pytest >= 8.0",
     "pytest-asyncio >= 0.23",

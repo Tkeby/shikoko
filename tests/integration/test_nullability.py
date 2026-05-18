@@ -15,10 +15,10 @@ from pathlib import Path
 import asyncpg
 import pytest
 
-from pysquirrel.introspect.catalog import CatalogCache
-from pysquirrel.introspect.prepare import TypeResolver, build_query_ir
-from pysquirrel.parser import parse_sql_file
-from pysquirrel.types.oid_map import resolve_type
+from shikoko.introspect.catalog import CatalogCache
+from shikoko.introspect.prepare import TypeResolver, build_query_ir
+from shikoko.parser import parse_sql_file
+from shikoko.types.oid_map import resolve_type
 
 
 def _pg_reachable() -> bool:
@@ -52,7 +52,7 @@ async def _annotate(conn: asyncpg.Connection, sql: str) -> dict[str, str]:
     and return the cleaned field names mapped to their type annotation
     strings (``"int"``, ``"str | None"``, etc.).
     """
-    from pysquirrel.parser import ParsedQuery
+    from shikoko.parser import ParsedQuery
 
     parsed = ParsedQuery(
         name="test_query",
@@ -72,7 +72,7 @@ async def _annotate(conn: asyncpg.Connection, sql: str) -> dict[str, str]:
 
 async def _annotate_with_resolver(conn: asyncpg.Connection, sql: str) -> dict[str, str]:
     """Like ``_annotate`` but uses a ``TypeResolver`` (the real pipeline path)."""
-    from pysquirrel.parser import ParsedQuery
+    from shikoko.parser import ParsedQuery
 
     parsed = ParsedQuery(
         name="test_query",

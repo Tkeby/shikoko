@@ -6,8 +6,8 @@ nullable output indices. No JSON, no Postgres.
 
 from __future__ import annotations
 
-from pysquirrel.introspect.nullability import nullables_from_plan
-from pysquirrel.introspect.plan import Plan
+from shikoko.introspect.nullability import nullables_from_plan
+from shikoko.introspect.plan import Plan
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -76,7 +76,7 @@ class TestNullablesFromPlan:
         assert nullables_from_plan(plan) == {0, 1}
 
     def test_5_semi_join_right_nullable(self) -> None:
-        """Semi Join(a, b) over [a.x, b.y] → {1} (mirrors Squirrel)."""
+        """Semi Join(a, b) over [a.x, b.y] → {1} (mirrors Shikoko)."""
         plan = Plan(
             join_type="Semi",
             output=("a.x", "b.y"),
@@ -276,8 +276,8 @@ class TestNullablesFromPlanDeterminism:
         This is the byte-compare check from the Day 5 plan. We strip the
         timestamp line before comparing.
         """
-        from pysquirrel.codegen.ir import Field, PyType, QueryIR, ReturnKind
-        from pysquirrel.codegen.render import render_module
+        from shikoko.codegen.ir import Field, PyType, QueryIR, ReturnKind
+        from shikoko.codegen.render import render_module
 
         _int = PyType("int", frozenset())
         _str = PyType("str", frozenset())

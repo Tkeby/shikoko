@@ -1,20 +1,20 @@
 # Type Mapping
 
-pysquirrel introspects your Postgres schema and generates Python type
+shikoko introspects your Postgres schema and generates Python type
 annotations that reflect the real column types. This document describes
 every supported mapping, how array and enum types are handled, how
-nullability is expressed, and what happens when pysquirrel encounters a
+nullability is expressed, and what happens when shikoko encounters a
 type it cannot map.
 
 The authoritative source for the OID-to-Python mapping lives in
-`src/pysquirrel/types/oid_map.py`. This document is the human-readable
+`src/shikoko/types/oid_map.py`. This document is the human-readable
 counterpart.
 
 ---
 
 ## Scalar type mappings
 
-The table below covers every built-in Postgres type that pysquirrel
+The table below covers every built-in Postgres type that shikoko
 maps. OIDs are stable across Postgres versions, so these are hardcoded
 rather than queried from `pg_type` at runtime.
 
@@ -166,11 +166,11 @@ the scalar table above.
 | 1561 | 1560 | `bit[]` | `list[str]` |
 | 1563 | 1562 | `varbit[]` | `list[str]` |
 
-For arrays of user-defined types (for example, `my_enum[]`), pysquirrel
+For arrays of user-defined types (for example, `my_enum[]`), shikoko
 queries `pg_type.typelem` via the catalog cache and recursively resolves
 the element type. The array is then wrapped in `list[...]` the same way.
 This is handled automatically by `TypeResolver` in
-`src/pysquirrel/introspect/prepare.py`.
+`src/shikoko/introspect/prepare.py`.
 
 ---
 
@@ -183,7 +183,7 @@ given this DDL:
 CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');
 ```
 
-pysquirrel generates:
+shikoko generates:
 
 ```python
 class Mood(StrEnum):
@@ -196,12 +196,12 @@ class Mood(StrEnum):
 
 **Class name:** The Postgres enum type name is converted to PascalCase.
 For example, `user_status` becomes `UserStatus`. The conversion uses
-`to_pascal_case` from `src/pysquirrel/codegen/naming.py` — no
+`to_pascal_case` from `src/shikoko/codegen/naming.py` — no
 pluralisation or other mangling is applied.
 
 **Member names:** Each Postgres enum label is converted to an
 upper-snake-case Python identifier by the `enum_member_name` function in
-`src/pysquirrel/types/enums.py`. The rules are:
+`src/shikoko/types/enums.py`. The rules are:
 
 1. Runs of non-identifier characters (`[^0-9A-Za-z_]`) are replaced
    with a single underscore.
@@ -239,7 +239,7 @@ enum definitions keyed by OID.
 ### Resolution
 
 Enum type OIDs are user-assigned, so they cannot be hardcoded. When
-pysquirrel encounters a non-builtin scalar OID, it queries
+shikoko encounters a non-builtin scalar OID, it queries
 `pg_type.typtype`. If the value is `'e'`, it fetches the labels from
 `pg_enum` (ordered by `enumsortorder`) and builds a `StrEnum` class.
 
@@ -257,7 +257,7 @@ Nullability is inferred from three sources in priority order:
 1. **Explicit overrides** — Append `!` (force non-null) or `?` (force
    nullable) to the column alias in your SQL. See
    [annotations.md](annotations.md) for full details.
-2. **EXPLAIN plan walker** — pysquirrel analyses the query plan to
+2. **EXPLAIN plan walker** — shikoko analyses the query plan to
    detect columns that can be null due to outer joins.
 3. **`pg_attribute.attnotnull`** — the Postgres catalog `NOT NULL`
    constraint.
@@ -269,7 +269,7 @@ overrides.
 
 ## Unsupported types
 
-When pysquirrel encounters a Postgres type that is not in the built-in
+When shikoko encounters a Postgres type that is not in the built-in
 OID table and is not an enum, it raises
 `UnsupportedTypeError` at code-generation time:
 
@@ -299,7 +299,7 @@ cast to a supported type in your query (e.g. `my_col::text`).
 
 ## The role of asyncpg
 
-pysquirrel generates **static type annotations** — it does not perform
+shikoko generates **static type annotations** — it does not perform
 runtime type conversion itself. The actual conversion from Postgres
 wire-format values to Python objects is handled by **asyncpg**, the
 database driver.
@@ -308,13 +308,13 @@ This means:
 
 - The Python types listed in the tables above are exactly what asyncpg
   returns at runtime. For example, asyncpg returns `datetime` objects
-  for `timestamptz` columns, so pysquirrel annotates them as
+  for `timestamptz` columns, so shikoko annotates them as
   `datetime`.
-- pysquirrel's job is to know the mapping ahead of time (from the OID)
+- shikoko's job is to know the mapping ahead of time (from the OID)
   so it can emit correct annotations and import statements in the
   generated code, without needing to execute the query first.
 - If asyncpg changes its return types in a future version, the mapping
-  in `src/pysquirrel/types/oid_map.py` would need to be updated to
+  in `src/shikoko/types/oid_map.py` would need to be updated to
   match. In practice these mappings are very stable.
 
 ### How resolution works at a high level

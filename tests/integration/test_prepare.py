@@ -9,10 +9,10 @@ from pathlib import Path
 
 import pytest
 
-from pysquirrel.errors import IntrospectionError
-from pysquirrel.introspect.prepare import build_query_ir, prepare_query
-from pysquirrel.parser import ParsedQuery, parse_sql_file
-from pysquirrel.types.oid_map import resolve_type
+from shikoko.errors import IntrospectionError
+from shikoko.introspect.prepare import build_query_ir, prepare_query
+from shikoko.parser import ParsedQuery, parse_sql_file
+from shikoko.types.oid_map import resolve_type
 
 
 def _pg_reachable() -> bool:
@@ -73,7 +73,7 @@ async def test_build_query_ir_find_user(
     queries_dir: Path,
 ) -> None:
     """build_query_ir produces a correct QueryIR for a -- @one query."""
-    from pysquirrel.codegen.ir import ReturnKind
+    from shikoko.codegen.ir import ReturnKind
 
     parsed = parse_sql_file(queries_dir / "find_user.sql")
     ir = await build_query_ir(schema_conn, parsed, resolve_type)  # type: ignore[arg-type]
@@ -94,7 +94,7 @@ async def test_build_query_ir_list_users(
     queries_dir: Path,
 ) -> None:
     """build_query_ir produces a correct QueryIR for a default (MANY) query."""
-    from pysquirrel.codegen.ir import ReturnKind
+    from shikoko.codegen.ir import ReturnKind
 
     parsed = parse_sql_file(queries_dir / "list_users.sql")
     ir = await build_query_ir(schema_conn, parsed, resolve_type)  # type: ignore[arg-type]
@@ -112,7 +112,7 @@ async def test_build_query_ir_create_user(
     queries_dir: Path,
 ) -> None:
     """build_query_ir produces a correct QueryIR for an -- @exec query."""
-    from pysquirrel.codegen.ir import ReturnKind
+    from shikoko.codegen.ir import ReturnKind
 
     parsed = parse_sql_file(queries_dir / "create_user.sql")
     ir = await build_query_ir(schema_conn, parsed, resolve_type)  # type: ignore[arg-type]

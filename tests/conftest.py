@@ -1,6 +1,6 @@
 """Shared fixtures for integration tests.
 
-Requires the ``squirrel-test-db`` container from ``example/docker-compose.yml``
+Requires the ``shikoko-test-db`` container from ``example/docker-compose.yml``
 running on localhost:54323.
 """
 
@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncpg
 import pytest
 
-_DSN = "postgresql://squirrel:squirrel@localhost:54323/squirrel"
+_DSN = "postgresql://shikoko:shikoko@localhost:54323/shikoko"
 _FIXTURES = Path(__file__).parent / "fixtures"
 _SCHEMAS = _FIXTURES / "schemas"
 _QUERIES = _FIXTURES / "queries"

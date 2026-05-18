@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from pysquirrel.errors import QueryParseError, UnknownAnnotationError
+from shikoko.errors import QueryParseError, UnknownAnnotationError
 
 # Annotations we understand.
 _KNOWN_ANNOTATIONS = frozenset({"one", "exec"})

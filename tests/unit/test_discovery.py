@@ -1,10 +1,10 @@
-"""Unit tests for pysquirrel.discovery — SQL directory and file finding."""
+"""Unit tests for shikoko.discovery — SQL directory and file finding."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from pysquirrel.discovery import find_sql_directories, find_sql_files
+from shikoko.discovery import find_sql_directories, find_sql_files
 
 
 def _touch(path: Path) -> Path:

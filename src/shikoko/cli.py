@@ -10,12 +10,12 @@ from typing import cast
 import asyncpg
 import typer
 
-from pysquirrel.config import ConnectionSettings, resolve_project
-from pysquirrel.errors import PysquirrelError
-from pysquirrel.introspect.connection import connect_pool
+from shikoko.config import ConnectionSettings, resolve_project
+from shikoko.errors import ShikokoError
+from shikoko.introspect.connection import connect_pool
 
 app = typer.Typer(
-    name="pysquirrel",
+    name="shikoko",
     help="Type-safe Python code generator for PostgreSQL queries.",
     no_args_is_help=True,
 )
@@ -23,9 +23,9 @@ app = typer.Typer(
 
 def _version_callback(value: bool) -> None:
     if value:
-        from pysquirrel import __version__
+        from shikoko import __version__
 
-        typer.echo(f"pysquirrel {__version__}")
+        typer.echo(f"shikoko {__version__}")
         raise typer.Exit()
 
 
@@ -39,20 +39,20 @@ def main_callback(
         is_eager=True,
     ),
 ) -> None:
-    """pysquirrel — type-safe SQL for Python."""
+    """shikoko — type-safe SQL for Python."""
 
 
 async def _generate_pipeline(project_root: Path, conn_info: ConnectionSettings) -> None:
     """Full generate pipeline: discover → parse → prepare → render → write."""
     from collections import defaultdict
 
-    from pysquirrel.check import compute_source_hash
-    from pysquirrel.codegen.format import format_source
-    from pysquirrel.codegen.render import render_module
-    from pysquirrel.discovery import find_sql_files
-    from pysquirrel.introspect.catalog import CatalogCache
-    from pysquirrel.introspect.prepare import TypeResolver, build_query_ir
-    from pysquirrel.parser import parse_sql_file
+    from shikoko.check import compute_source_hash
+    from shikoko.codegen.format import format_source
+    from shikoko.codegen.render import render_module
+    from shikoko.discovery import find_sql_files
+    from shikoko.introspect.catalog import CatalogCache
+    from shikoko.introspect.prepare import TypeResolver, build_query_ir
+    from shikoko.parser import parse_sql_file
 
     sql_files = find_sql_files(project_root)
     if not sql_files:
@@ -141,7 +141,7 @@ def check(
     Exits 0 when generated files are byte-identical, exits 1 with a diff on
     stderr otherwise.
     """
-    from pysquirrel.check import check_pipeline
+    from shikoko.check import check_pipeline
 
     project = resolve_project(root=root, database_url=database_url)
     conn_info = project.connection
@@ -178,6 +178,6 @@ def main() -> None:
     """CLI entry point — wraps typer with top-level error handling."""
     try:
         app()
-    except PysquirrelError as exc:
+    except ShikokoError as exc:
         typer.echo(f"Error: {exc}", err=True)
         sys.exit(1)

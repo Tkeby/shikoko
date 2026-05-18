@@ -19,12 +19,12 @@ from typing import Any
 import asyncpg
 import pytest
 
-from pysquirrel.codegen.ir import EnumIR, Field
-from pysquirrel.codegen.render import render_module
-from pysquirrel.introspect.catalog import CatalogCache
-from pysquirrel.introspect.prepare import TypeResolver, build_query_ir
-from pysquirrel.parser import ParsedQuery
-from pysquirrel.types.enums import build_enum_ir, enum_member_name, enum_py_name
+from shikoko.codegen.ir import EnumIR, Field
+from shikoko.codegen.render import render_module
+from shikoko.introspect.catalog import CatalogCache
+from shikoko.introspect.prepare import TypeResolver, build_query_ir
+from shikoko.parser import ParsedQuery
+from shikoko.types.enums import build_enum_ir, enum_member_name, enum_py_name
 
 
 def _pg_reachable() -> bool:

@@ -1,4 +1,4 @@
--- Example app schema for pysquirrel demo.
+-- Example app schema for shikoko demo.
 -- Run this against the demo database before starting the app.
 
 drop table if exists posts cascade;

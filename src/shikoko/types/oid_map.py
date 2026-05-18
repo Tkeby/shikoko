@@ -15,8 +15,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pysquirrel.codegen.ir import PyType
-from pysquirrel.errors import UnsupportedTypeError
+from shikoko.codegen.ir import PyType
+from shikoko.errors import UnsupportedTypeError
 
 # Imports we reuse across multiple PyType entries.
 _DATETIME_IMPORT = frozenset({"from datetime import datetime"})
@@ -158,7 +158,7 @@ def resolve_type(oid: int, type_name: str, kind: str) -> PyType:
     This is the synchronous, catalog-free entry point that exists for
     callers that don't need enum or user-defined-array support (mostly
     tests). For full support including enums, use
-    :class:`pysquirrel.introspect.prepare.TypeResolver`.
+    :class:`shikoko.introspect.prepare.TypeResolver`.
 
     Args:
         oid: The Postgres type OID. For arrays this is the array OID

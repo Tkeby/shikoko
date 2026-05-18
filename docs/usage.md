@@ -2,13 +2,13 @@
 
 ## Installation
 
-pysquirrel requires Python 3.10+ and a running PostgreSQL 16+ instance.
+shikoko requires Python 3.10+ and a running PostgreSQL 16+ instance.
 
 ```bash
-pip install pysquirrel
+pip install shikoko
 ```
 
-This installs the `pysquirrel` CLI and its runtime dependencies (`asyncpg`, `pydantic`, `typer`). pysquirrel itself is only needed at generation time; your application at runtime only requires `asyncpg` and `pydantic`.
+This installs the `shikoko` CLI and its runtime dependencies (`asyncpg`, `pydantic`, `typer`). shikoko itself is only needed at generation time; your application at runtime only requires `asyncpg` and `pydantic`.
 
 Optional: install `ruff` for automatic formatting of generated files:
 
@@ -19,7 +19,7 @@ pip install ruff
 Verify the installation:
 
 ```bash
-pysquirrel --version
+shikoko --version
 ```
 
 ---
@@ -33,12 +33,12 @@ pysquirrel --version
 | `--version` | Print the installed version and exit |
 | `--help` | Show help text and exit |
 
-### `pysquirrel generate`
+### `shikoko generate`
 
 Connect to Postgres, introspect every `.sql` file found under `sql/` directories, and write a `sql_generated.py` module next to each one.
 
 ```bash
-pysquirrel generate [OPTIONS]
+shikoko generate [OPTIONS]
 ```
 
 **Options:**
@@ -65,15 +65,15 @@ pysquirrel generate [OPTIONS]
 **Example:**
 
 ```bash
-pysquirrel generate --root ./my_project --database-url postgresql://user:pass@localhost:5432/mydb
+shikoko generate --root ./my_project --database-url postgresql://user:pass@localhost:5432/mydb
 ```
 
-### `pysquirrel check`
+### `shikoko check`
 
 Regenerate in-memory and diff against the files already on disk. Designed for CI pipelines — exits `0` when everything is up to date, exits `1` with a unified diff on stderr when anything differs.
 
 ```bash
-pysquirrel check [OPTIONS]
+shikoko check [OPTIONS]
 ```
 
 **Options:** identical to `generate` (`--root`, `--database-url`).
@@ -90,14 +90,14 @@ pysquirrel check [OPTIONS]
 **Example:**
 
 ```bash
-pysquirrel check --root . --database-url "$DATABASE_URL"
+shikoko check --root . --database-url "$DATABASE_URL"
 ```
 
 ---
 
 ## Connection configuration
 
-pysquirrel resolves the Postgres connection using a four-level precedence chain:
+shikoko resolves the Postgres connection using a four-level precedence chain:
 
 1. **`--database-url` CLI flag** — highest priority. Accepts a full DSN:
    ```
@@ -118,7 +118,7 @@ pysquirrel resolves the Postgres connection using a four-level precedence chain:
    - The `[project].name` field in `pyproject.toml` (hyphens replaced with underscores), if present.
    - The name of the current working directory, if no `pyproject.toml` is found.
 
-If no database name can be resolved, `pysquirrel generate` and `pysquirrel check` print an error and exit with code 1.
+If no database name can be resolved, `shikoko generate` and `shikoko check` print an error and exit with code 1.
 
 ---
 
@@ -141,7 +141,7 @@ my_project/
 
 ### Multiple `sql/` directories
 
-pysquirrel discovers every directory named `sql` under the project root. Each one gets its own `sql_generated.py`, written in the directory that contains the `sql/` folder.
+shikoko discovers every directory named `sql` under the project root. Each one gets its own `sql_generated.py`, written in the directory that contains the `sql/` folder.
 
 ```
 my_project/
@@ -187,7 +187,7 @@ The filename stem (`list_active_users`) becomes the Python function name. The co
 
 ### Annotations
 
-Annotations are special `--` comments that pysquirrel recognizes:
+Annotations are special `--` comments that shikoko recognizes:
 
 #### `-- name: <query_name>` — override the function name
 
@@ -240,7 +240,7 @@ select id, email, name from users order by id
 
 ### Nullability overrides
 
-pysquirrel infers whether each column is nullable from three sources, applied in priority order:
+shikoko infers whether each column is nullable from three sources, applied in priority order:
 
 1. **Explicit `!` / `?` suffixes** on column aliases in the `SELECT` list.
 2. **EXPLAIN plan walking** — detects columns made nullable by `LEFT JOIN`, `RIGHT JOIN`, or `FULL JOIN`.
@@ -274,7 +274,7 @@ The `?` is stripped from the Python field name. The generated field is `avatar_u
 
 ### Parameters
 
-Use positional parameters (`$1`, `$2`, `$3`, ...) in your SQL. pysquirrel maps them to Python function parameters named `_1`, `_2`, `_3`, etc. All parameters are typed based on what Postgres reports and default to `None`, matching asyncpg's convention.
+Use positional parameters (`$1`, `$2`, `$3`, ...) in your SQL. shikoko maps them to Python function parameters named `_1`, `_2`, `_3`, etc. All parameters are typed based on what Postgres reports and default to `None`, matching asyncpg's convention.
 
 ```sql
 -- Create a new user and return the row.
@@ -302,7 +302,7 @@ async def create_user(
 
 ### Postgres enums
 
-When a query references a Postgres enum type, pysquirrel generates a `StrEnum` class in the output module. The enum class is shared across all queries in the same `sql/` directory that reference it.
+When a query references a Postgres enum type, shikoko generates a `StrEnum` class in the output module. The enum class is shared across all queries in the same `sql/` directory that reference it.
 
 ---
 
@@ -313,7 +313,7 @@ The generated `sql_generated.py` module has the following sections, always in th
 ### Header comment
 
 ```python
-# AUTO-GENERATED by pysquirrel — do not edit manually.
+# AUTO-GENERATED by shikoko — do not edit manually.
 # source: sql
 # generated at: 2025-01-15 10:30:00 UTC
 # hash: a1b2c3d4e5f6...
@@ -404,10 +404,10 @@ from users
 where email = $1
 ```
 
-pysquirrel generates:
+shikoko generates:
 
 ```python
-# AUTO-GENERATED by pysquirrel — do not edit manually.
+# AUTO-GENERATED by shikoko — do not edit manually.
 # source: sql
 # generated at: 2025-01-15 10:30:00 UTC
 # hash: abc123...
@@ -537,7 +537,7 @@ from admin.sql_generated import dashboard_stats
 
 ### GitHub Actions
 
-Use `pysquirrel check` in your CI pipeline to ensure generated files are never out of date:
+Use `shikoko check` in your CI pipeline to ensure generated files are never out of date:
 
 ```yaml
 name: Check generated SQL
@@ -569,13 +569,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install pysquirrel
-        run: pip install pysquirrel
+      - name: Install shikoko
+        run: pip install shikoko
 
       - name: Check generated files
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/testdb
-        run: pysquirrel check
+        run: shikoko check
 ```
 
 ### Shell script
@@ -584,12 +584,12 @@ jobs:
 #!/bin/bash
 set -euo pipefail
 
-pysquirrel check --root . --database-url "$DATABASE_URL"
+shikoko check --root . --database-url "$DATABASE_URL"
 ```
 
 ### How the check fast path works
 
-The generated file contains a `# hash:` line with the SHA-256 digest of the source `.sql` files. On `check`, pysquirrel:
+The generated file contains a `# hash:` line with the SHA-256 digest of the source `.sql` files. On `check`, shikoko:
 
 1. Reads the existing `sql_generated.py` and extracts the stored hash.
 2. Computes the current hash of the source `.sql` files.
@@ -626,13 +626,13 @@ When `check` exits with code `1`, a unified diff is printed to stdout showing wh
 
 ## Error reference
 
-All errors raised by pysquirrel are subclasses of `PysquirrelError`. They include file and line information where applicable.
+All errors raised by shikoko are subclasses of `ShikokoError`. They include file and line information where applicable.
 
 | Error class | Cause |
 |---|---|
 | `QueryParseError` | A `.sql` file has no SQL body (only comments or empty). |
 | `UnknownAnnotationError` | An unrecognized `-- @` annotation was found in the comment block. |
-| `UnsupportedTypeError` | A Postgres column or parameter type (OID) is not in pysquirrel's type map. |
+| `UnsupportedTypeError` | A Postgres column or parameter type (OID) is not in shikoko's type map. |
 | `IntrospectionError` | Postgres returned an error during `PREPARE` or `EXPLAIN` (e.g., the query references a nonexistent table). |
 | `ConfigError` | Connection settings could not be resolved (e.g., invalid DSN, no database name). |
 
