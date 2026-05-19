@@ -152,7 +152,7 @@ async def delete_user(
 shikoko infers nullability automatically from three sources, in priority order:
 
 1. **Explicit overrides** via `!` / `?` suffixes on column aliases
-2. **EXPLAIN plan walking** — detects columns made nullable by outer joins (`LEFT`, `RIGHT`, `FULL`)
+2. **EXPLAIN plan walking** detects columns made nullable by outer joins (`LEFT`, `RIGHT`, `FULL`)
 3. **Catalog fallback** — `pg_attribute.attnotnull` from the database schema
 
 When you need to override the inferred decision, append a marker to the column alias in your `SELECT` list:
