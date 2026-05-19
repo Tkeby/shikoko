@@ -123,9 +123,9 @@ def _parse_dsn(dsn: str) -> ConnectionSettings:
 
     Handles ``postgresql://user:pass@host:port/dbname?k=v`` form.
     """
-    if not dsn.startswith("postgresql://"):
+    if not dsn.startswith(("postgresql://", "postgres://")):
         raise ConfigError(
-            f"Invalid DATABASE_URL: must start with postgresql://, got {dsn!r}"
+            f"Invalid DATABASE_URL: must start with postgresql:// or postgres://, got {dsn!r}"
         )
 
     try:
