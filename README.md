@@ -279,22 +279,21 @@ The [`example/`](example/) directory contains a complete, runnable FastAPI appli
 # 1. Install shikoko
 pip install shikoko
 
-# 2. Start Postgres
-docker compose -f example/docker-compose.yml up -d
+# 2. Configure your database
+#    Copy .env.example to .env and set DATABASE_URL to your running PostgreSQL 16+
+cd example/app
+cp .env.example .env
+# Edit .env: DATABASE_URL=postgresql://user:password@localhost:5432/mydb
 
 # 3. Apply the schema
-psql postgresql://shikoko:shikoko@localhost:54323/shikoko \
-  -f example/app/migrations/001_init.sql
+psql "$DATABASE_URL" -f migrations/001_init.sql
 
 # 4. Generate the query module
-shikoko generate --root example/app/ \
-  --database-url postgresql://shikoko:shikoko@localhost:54323/shikoko
+shikoko generate --root example/app/
 
 # 5. Install app dependencies and run
-cd example/app
-pip install fastapi uvicorn asyncpg
-DATABASE_URL=postgresql://shikoko:shikoko@localhost:54323/shikoko \
-  uvicorn main:app --reload
+pip install -e .
+uvicorn main:app --reload
 ```
 
 Visit http://localhost:8000/docs for the interactive API docs.
