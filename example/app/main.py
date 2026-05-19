@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import os
-
 import asyncpg
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, status
 
 # Import the generated query functions.
@@ -22,12 +21,11 @@ from sql_generated import (
     list_users,
 )
 
-app = FastAPI(title="shikoko Demo", version="0.1.0")
+from shikoko.config import resolve_connection
 
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL",
-    "postgresql://shikoko:shikoko@localhost:54323/shikoko",
-)
+load_dotenv()
+
+app = FastAPI(title="shikoko Demo", version="0.1.0")
 
 _pool: asyncpg.Pool | None = None
 
@@ -35,7 +33,8 @@ _pool: asyncpg.Pool | None = None
 async def _get_pool() -> asyncpg.Pool:
     global _pool
     if _pool is None:
-        _pool = await asyncpg.create_pool(DATABASE_URL, min_size=2, max_size=10)
+        settings = resolve_connection()
+        _pool = await asyncpg.create_pool(dsn=settings.dsn, min_size=2, max_size=10)
     return _pool
 
 

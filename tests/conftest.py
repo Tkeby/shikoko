@@ -1,7 +1,7 @@
 """Shared fixtures for integration tests.
 
-Requires the ``shikoko-test-db`` container from ``example/docker-compose.yml``
-running on localhost:54323.
+Requires a running PostgreSQL 16+ database. Configure the connection via
+``DATABASE_URL`` or individual ``PG*`` env vars (see .env.example).
 """
 
 from __future__ import annotations
@@ -11,7 +11,8 @@ from pathlib import Path
 import asyncpg
 import pytest
 
-_DSN = "postgresql://shikoko:shikoko@localhost:54323/shikoko"
+from shikoko.config import resolve_connection
+
 _FIXTURES = Path(__file__).parent / "fixtures"
 _SCHEMAS = _FIXTURES / "schemas"
 _QUERIES = _FIXTURES / "queries"
@@ -19,12 +20,13 @@ _QUERIES = _FIXTURES / "queries"
 
 def _pg_reachable() -> bool:
     """Check if the test Postgres is reachable."""
+    settings = resolve_connection()
     import socket
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(1)
     try:
-        result = sock.connect_ex(("localhost", 54323))
+        result = sock.connect_ex((settings.host, settings.port))
         return result == 0
     finally:
         sock.close()
@@ -32,14 +34,15 @@ def _pg_reachable() -> bool:
 
 skip_no_db = pytest.mark.skipif(
     not _pg_reachable(),
-    reason="Test Postgres not reachable on localhost:54323",
+    reason="Test Postgres not reachable — set DATABASE_URL or PG* env vars",
 )
 
 
 @pytest.fixture
 async def pool():
     """Provide a connection pool to the test database, closing after the test."""
-    async with asyncpg.create_pool(_DSN, min_size=1, max_size=3) as p:
+    settings = resolve_connection()
+    async with asyncpg.create_pool(dsn=settings.dsn, min_size=1, max_size=3) as p:
         yield p
 
 

@@ -4,9 +4,9 @@ name: Publish to PyPI
 # Uploads to PyPI via Trusted Publishing (OIDC) — no API token required.
 # One-time setup on PyPI:
 #   https://pypi.org/manage/account/publishing/
-#     PyPI project name: pysquirrel
+#     PyPI project name: shikoko
 #     Owner:             Tkeby
-#     Repository:        pysquirrel
+#     Repository:        shikoko
 #     Workflow filename: pypi.yml
 #     Environment:       pypi
 

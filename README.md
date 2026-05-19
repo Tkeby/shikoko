@@ -9,9 +9,7 @@
 
 Write SQL. Get typed Python. No ORM.
 
-> *shikoko* (ሽኮኮ) is Amharic for "squirrel" — a Python descendant of [Squirrel](https://github.com/giacomocavalieri/squirrel), the Gleam library. It borrows Squirrel's general architecture but has drifted in the details to work within asyncpg's constraints.
-
-shikoko reads `.sql` files, connects to a live Postgres database, introspects your queries via `PREPARE`/`EXPLAIN`, and generates a Python module with **Pydantic v2 row models**, **async functions**, and **enum classes** — so your database layer is fully typed, validated, and IDE-friendly without writing a single model class by hand.
+*shikoko* (ሽኮኮ) is Amharic for "squirrel". It reads `.sql` files, connects to a live Postgres database, introspects your queries via `PREPARE`/`EXPLAIN`, and generates a Python module with **Pydantic v2 row models**, **async functions**, and **enum classes** — so your database layer is fully typed, validated, and IDE-friendly without writing a single model class by hand.
 
 ## What is shikoko?
 
@@ -279,22 +277,21 @@ The [`example/`](example/) directory contains a complete, runnable FastAPI appli
 # 1. Install shikoko
 pip install shikoko
 
-# 2. Start Postgres
-docker compose -f example/docker-compose.yml up -d
+# 2. Configure your database
+#    Copy .env.example to .env and set DATABASE_URL to your running PostgreSQL 16+
+cd example/app
+cp .env.example .env
+# Edit .env: DATABASE_URL=postgresql://user:password@localhost:5432/mydb
 
 # 3. Apply the schema
-psql postgresql://shikoko:shikoko@localhost:54323/shikoko \
-  -f example/app/migrations/001_init.sql
+psql "$DATABASE_URL" -f migrations/001_init.sql
 
 # 4. Generate the query module
-shikoko generate --root example/app/ \
-  --database-url postgresql://shikoko:shikoko@localhost:54323/shikoko
+shikoko generate --root example/app/
 
 # 5. Install app dependencies and run
-cd example/app
-pip install fastapi uvicorn asyncpg
-DATABASE_URL=postgresql://shikoko:shikoko@localhost:54323/shikoko \
-  uvicorn main:app --reload
+pip install -e .
+uvicorn main:app --reload
 ```
 
 Visit http://localhost:8000/docs for the interactive API docs.
@@ -310,9 +307,12 @@ curl http://localhost:8000/users/1/posts
 
 ### App code
 
-The FastAPI app imports the generated module directly:
+The FastAPI app imports the generated module directly and uses
+`shikoko.config.resolve_connection()` to configure the asyncpg pool from
+environment variables:
 
 ```python
+from shikoko.config import resolve_connection
 from sql_generated import (
     ListUsersRow,
     FindUserByEmailRow,
@@ -329,6 +329,10 @@ async def get_users() -> list[ListUsersRow]:
     async with pool.acquire() as conn:
         return await list_users(conn)
 ```
+
+`resolve_connection()` reads `DATABASE_URL` from the environment (or a `.env`
+file via `python-dotenv`) and returns a `ConnectionSettings` with a `.dsn`
+property ready for `asyncpg.create_pool()`.
 
 See [`example/app/main.py`](example/app/main.py) for the full application.
 
@@ -369,9 +373,23 @@ shikoko check [OPTIONS]
 shikoko resolves the database connection using the following precedence:
 
 1. `--database-url` CLI flag
-2. `DATABASE_URL` environment variable
+2. `DATABASE_URL` environment variable (also loaded from `.env` in the project root)
 3. Individual `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` / `PGDATABASE` environment variables
 4. Defaults: `localhost:5432`, user `postgres`, database name from `pyproject.toml` or current directory name
+
+The same resolution logic is available to your application code via the public
+`shikoko.config.resolve_connection()` function. It returns a
+`ConnectionSettings` with `.dsn`, `.host`, `.port`, `.user`, `.password`,
+and `.database` attributes — ideal for configuring an asyncpg pool directly
+from the same environment variables that `shikoko generate` / `shikoko check`
+use.
+
+```python
+from shikoko.config import resolve_connection
+
+settings = resolve_connection()
+pool = await asyncpg.create_pool(dsn=settings.dsn)
+```
 
 ### `shikoko --version`
 
@@ -425,6 +443,9 @@ See [`docs/type-mapping.md`](docs/type-mapping.md) for the complete table with O
 - **asyncpg** >= 0.29
 - **Pydantic** >= 2.6
 
-## License
+## Reference
 
-[MIT](https://github.com/tsegaw/shikoko/blob/main/LICENSE)
+shikoko is a Python port of [Squirrel](https://github.com/giacomocavalieri/squirrel), an excellent Gleam library by Giacomo Cavalieri. Many of the core ideas — SQL-first code generation, `EXPLAIN`-driven nullability inference, and annotation syntax — originate from Squirrel.
+
+## License
+MIT license ([MIT](https://github.com/tsegaw/shikoko/blob/main/LICENSE))

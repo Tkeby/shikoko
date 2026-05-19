@@ -9,42 +9,53 @@ A minimal FastAPI application that demonstrates shikoko's workflow:
 
 ## Quick Start
 
-### 1. Start Postgres
+### Prerequisites
+
+- A running **PostgreSQL 16+** database (shikoko does not manage the server)
+- [shikoko](https://pypi.org/project/shikoko/) installed (`pip install shikoko`)
+
+### 1. Configure the database connection
+
+Copy `.env.example` to `.env` and fill in your database URL:
 
 ```bash
-# From the example/ directory:
-docker compose -f docker-compose.yml up -d
-# Wait for it to be healthy:
-docker compose -f docker-compose.yml logs -f db
+cd app
+cp .env.example .env
+# Edit .env with your actual connection string:
+#   DATABASE_URL=postgresql://user:password@localhost:5432/mydb
 ```
+
+shikoko resolves the connection from the `DATABASE_URL` environment variable
+(or individual `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` / `PGDATABASE`
+env vars). See the [connection resolution](#connection-resolution) section below.
 
 ### 2. Apply the schema
 
 ```bash
-psql postgresql://shikoko:shikoko@localhost:54323/shikoko \
-  -f app/migrations/001_init.sql
+psql "$DATABASE_URL" -f app/migrations/001_init.sql
 ```
 
 ### 3. Generate the query module
 
 ```bash
-# From the project root (or install shikoko first: pip install -e .)
-shikoko generate --root example/app/ \
-  --database-url postgresql://shikoko:shikoko@localhost:54323/shikoko
+shikoko generate --root example/app/
 ```
 
-This creates `example/app/sql_generated.py` containing:
+This reads `DATABASE_URL` from the environment, connects to your database,
+and creates `example/app/sql_generated.py` containing:
 - Pydantic row models (`ListUsersRow`, `FindUserByEmailRow`, etc.)
 - Async query functions (`list_users`, `find_user_by_email`, etc.)
 
-### 4. Run the app
+### 4. Install dependencies and run the app
 
 ```bash
 cd example/app
-pip install fastapi uvicorn asyncpg
-DATABASE_URL=postgresql://shikoko:shikoko@localhost:54323/shikoko \
-  uvicorn main:app --reload
+pip install -e .
+uvicorn main:app --reload
 ```
+
+The app loads `DATABASE_URL` from `.env` via `python-dotenv` and uses
+shikoko's `resolve_connection()` to configure the asyncpg pool.
 
 Visit http://localhost:8000/docs for the interactive API docs.
 
@@ -74,15 +85,13 @@ against the existing file. If they differ, it exits 1 with a unified diff —
 perfect for CI:
 
 ```bash
-# In CI:
-shikoko check --root example/app/ \
-  --database-url postgresql://shikoko:shikoko@localhost:54323/shikoko
+shikoko check --root example/app/
 ```
 
 If someone edits a `.sql` file but forgets to regenerate, CI catches it:
 
 ```bash
-$ shikoko check --root example/app/ --database-url ...
+$ shikoko check --root example/app/
 --- a/example/app/sql_generated.py
 +++ b/example/app/sql_generated.py
 @@ ... @@
@@ -96,12 +105,27 @@ The generated file embeds a SHA-256 hash of the source `.sql` files in its
 header. When `check` sees a matching hash, it skips the database round-trip
 entirely — making CI fast when nothing has changed.
 
+### CI example
+
+See [`ci_demo.sh`](ci_demo.sh) for a complete CI workflow script. It assumes
+`DATABASE_URL` is already set in the CI environment.
+
+## Connection resolution
+
+shikoko resolves the database connection using the following precedence:
+
+1. `--database-url` CLI flag
+2. `DATABASE_URL` environment variable
+3. Individual `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` / `PGDATABASE` environment variables
+4. Defaults: `localhost:5432`, user `postgres`, database name from `pyproject.toml` or current directory name
+
 ## Project Structure
 
 ```
 example/
 ├── app/
 │   ├── main.py              # FastAPI app — imports sql_generated
+│   ├── .env.example         # Template — copy to .env with your DATABASE_URL
 │   ├── sql/
 │   │   ├── list_users.sql
 │   │   ├── find_user_by_email.sql
@@ -111,13 +135,7 @@ example/
 │   ├── migrations/
 │   │   └── 001_init.sql     # Schema + seed data
 │   ├── sql_generated.py     # AUTO-GENERATED — do not edit
-│   ├── Dockerfile
 │   └── pyproject.toml
-├── docker-compose.yml       # Postgres for tests
-├── demo-compose.yml         # Postgres + app for full demo
 ├── ci_demo.sh               # Example CI workflow
-└── docker/
-    └── postgres/
-        ├── Dockerfile
-        └── postgresql.conf
+└── README.md
 ```
