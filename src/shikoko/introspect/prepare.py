@@ -475,7 +475,10 @@ async def build_query_ir(
     return QueryIR(
         name=parsed.name,
         doc=parsed.doc,
-        sql=parsed.body,
+        # Strip ``!``/``?`` override suffixes: they drive nullability
+        # inference above (via the raw body) but are not valid SQL and
+        # must not leak into the generated query constant.
+        sql=_strip_override_suffixes(parsed.body),
         params=tuple(ir_params),
         row_model_name=model_name,
         fields=tuple(ir_fields),
