@@ -4,7 +4,25 @@ All notable changes to shikoko will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.1.1] - 2026-05-19
+
+### Fixed
+
+- **Enum-typed query parameters no longer crash introspection.**
+  `shikoko generate` previously failed with
+  `InvalidTextRepresentationError: invalid input value for enum <name>: ""`
+  whenever a query bound a parameter to a user-defined enum type
+  (e.g. `where paid_with = $2::payment_method`). The EXPLAIN
+  `GENERIC_PLAN` prepass dispatches dummy values for each parameter to
+  satisfy asyncpg's extended-query Bind step; the fallback for unknown
+  OIDs was the empty string, which Postgres rejects as an invalid
+  enum label. The fallback is now `NULL`, which the wire protocol
+  accepts for every parameter type because Bind skips the
+  type-specific input decoder on null parameters. User-defined
+  domains and composites benefit from the same change.
+  ([`src/shikoko/introspect/plan.py`](src/shikoko/introspect/plan.py))
+
+## [0.1.0] - 2026-05-19
 
 ### Added
 
