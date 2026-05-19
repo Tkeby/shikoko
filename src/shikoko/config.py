@@ -14,6 +14,35 @@ _DEFAULT_USER = "postgres"
 _DEFAULT_PASSWORD = ""
 _DEFAULT_TIMEOUT = 10
 
+_LOADED_ENV_FILES: set[Path] = set()
+
+
+def _load_dotenv(path: Path) -> None:
+    """Load a ``.env`` file into ``os.environ`` (idempotent per file).
+
+    Minimal ``.env`` parser: ``KEY=VALUE`` lines, ``#`` comments, blank lines.
+    Quoted values (``'…'`` or ``"…"``) are stripped of their surrounding quotes.
+    Does not handle variable interpolation or multiline values.
+    """
+    resolved = path.resolve()
+    if resolved in _LOADED_ENV_FILES or not path.is_file():
+        return
+    _LOADED_ENV_FILES.add(resolved)
+
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if "=" not in stripped:
+            continue
+        key, _, value = stripped.partition("=")
+        key = key.strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+            value = value[1:-1]
+        if key and key not in os.environ:
+            os.environ[key] = value
+
 
 @dataclass(frozen=True)
 class ConnectionSettings:
@@ -76,11 +105,14 @@ def resolve_connection(
     """Resolve connection settings following the precedence chain.
 
     1. Explicit ``database_url`` (from ``--database-url`` flag).
-    2. ``DATABASE_URL`` environment variable.
+    2. ``DATABASE_URL`` environment variable (auto-loads ``.env`` from *root*).
     3. Individual ``PGHOST`` / ``PGPORT`` / … env vars.
     4. Sensible defaults (localhost:5432, user ``postgres``, db from project
        name).
     """
+    if root is not None:
+        _load_dotenv(root / ".env")
+
     dsn = database_url or os.environ.get("DATABASE_URL")
     if dsn:
         return _parse_dsn(dsn)

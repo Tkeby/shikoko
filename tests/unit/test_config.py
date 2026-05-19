@@ -11,6 +11,7 @@ import pytest
 from shikoko.config import (
     ConnectionSettings,
     ProjectSettings,
+    _load_dotenv,
     _parse_dsn,
     resolve_connection,
     resolve_project,
@@ -127,6 +128,95 @@ class TestResolveConnection:
         with patch.dict(os.environ, {}, clear=True):
             result = resolve_connection(root=tmp_path)
         assert result.database == "my_cool_app"
+
+
+# ---------------------------------------------------------------------------
+# _load_dotenv
+# ---------------------------------------------------------------------------
+
+
+class TestLoadDotenv:
+    def test_loads_key_value(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text("DATABASE_URL=postgres://u:p@h:5432/db\n")
+        with patch.dict(os.environ, {}, clear=True):
+            _load_dotenv(env_file)
+            assert os.environ["DATABASE_URL"] == "postgres://u:p@h:5432/db"
+
+    def test_strips_quotes(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text('KEY="value with spaces"\n')
+        with patch.dict(os.environ, {}, clear=True):
+            _load_dotenv(env_file)
+            assert os.environ["KEY"] == "value with spaces"
+
+    def test_strips_single_quotes(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text("KEY='single quoted'\n")
+        with patch.dict(os.environ, {}, clear=True):
+            _load_dotenv(env_file)
+            assert os.environ["KEY"] == "single quoted"
+
+    def test_ignores_comments(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text("# comment\nKEY=val\n")
+        with patch.dict(os.environ, {}, clear=True):
+            _load_dotenv(env_file)
+            assert os.environ["KEY"] == "val"
+            assert "# comment" not in os.environ
+
+    def test_ignores_blank_lines(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text("\nKEY=val\n\n")
+        with patch.dict(os.environ, {}, clear=True):
+            _load_dotenv(env_file)
+            assert os.environ["KEY"] == "val"
+
+    def test_does_not_override_existing_env(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text("EXISTING=from_dotenv\n")
+        with patch.dict(os.environ, {"EXISTING": "from_shell"}, clear=True):
+            _load_dotenv(env_file)
+            assert os.environ["EXISTING"] == "from_shell"
+
+    def test_missing_file_is_noop(self, tmp_path: Path) -> None:
+        missing = tmp_path / ".env"
+        # file doesn't exist — should not raise
+        with patch.dict(os.environ, {}, clear=True):
+            _load_dotenv(missing)
+            assert "DATABASE_URL" not in os.environ
+
+
+class TestResolveConnectionWithDotenv:
+    def test_loads_dotenv_from_root(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text(
+            "DATABASE_URL=postgres://supython:supython@localhost:54323/supython?sslmode=disable\n"
+        )
+        with patch.dict(os.environ, {}, clear=True):
+            result = resolve_connection(root=tmp_path)
+        assert result.host == "localhost"
+        assert result.port == 54323
+        assert result.database == "supython"
+        assert result.user == "supython"
+
+    def test_explicit_database_url_wins_over_dotenv(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text(
+            "DATABASE_URL=postgres://from:dotenv@localhost:5432/dotenv_db\n"
+        )
+        with patch.dict(os.environ, {}, clear=True):
+            result = resolve_connection(
+                root=tmp_path, database_url="postgres://x:x@localhost:5433/explicit"
+            )
+        assert result.database == "explicit"
+        assert result.port == 5433
+
+    def test_no_dotenv_file_uses_defaults(self, tmp_path: Path) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            result = resolve_connection(root=tmp_path)
+        assert result.host == "localhost"
+        assert result.port == 5432
 
 
 # ---------------------------------------------------------------------------
