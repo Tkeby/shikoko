@@ -179,13 +179,17 @@ _DUMMY_PARAM: dict[int, object] = {
 }
 
 
-def _dummy_for_type(oid: int) -> object:
+def _dummy_for_type(oid: int) -> object | None:
     """Return a dummy value that asyncpg can encode for *oid*.
 
-    Falls back to the empty string for unknown types — this is safe
-    because GENERIC_PLAN never evaluates the parameter.
+    Falls back to ``None`` (SQL NULL) for unknown types — including
+    user-defined types like enums, domains, and composites. NULL is
+    valid at Bind for every parameter type because the wire protocol
+    skips the type-specific input decoder for null parameters; using
+    ``""`` instead would break enum parameters, since the empty string
+    is not a valid label for any enum type.
     """
-    return _DUMMY_PARAM.get(oid, "")
+    return _DUMMY_PARAM.get(oid, None)
 
 
 async def run_explain(conn: asyncpg.Connection, body: str) -> Plan | None:

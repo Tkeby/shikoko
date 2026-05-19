@@ -291,6 +291,27 @@ async def test_enum_class_renders_correctly(
     assert "IN_PROGRESS = 'in-progress'" in src
 
 
+@skip_no_db
+async def test_enum_typed_param_introspects(
+    conn: asyncpg.Connection, mood_enum: str
+) -> None:
+    """Regression: a query whose parameter is a user-defined enum type
+    must introspect without crashing during the EXPLAIN prepass.
+
+    Previously, ``_dummy_for_type`` fell back to ``""`` for unknown OIDs,
+    which Postgres rejects as an invalid enum label at Bind time.
+    """
+    catalog = CatalogCache(conn)
+    resolver = TypeResolver(catalog)
+    parsed = _parsed(
+        "find_by_mood",
+        "select 'happy'::mood as m where $1::mood is not null",
+    )
+    ir = await build_query_ir(conn, parsed, resolver)
+    assert len(ir.params) == 1
+    assert ir.params[0].py_type.annotation == "Mood"
+
+
 # ---------------------------------------------------------------------------
 # End-to-end: real table with every supported type
 # ---------------------------------------------------------------------------
